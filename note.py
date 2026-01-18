@@ -11,3 +11,5 @@ def note_tool(note):
     """
     with open("notes.txt", "a") as f:
         f.write(note + "\n")
+
+# note.py is changed

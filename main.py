@@ -1,12 +1,13 @@
 from dotenv import load_dotenv
 import os
-from github import fetch_issues
-from langchain_openai import ChatOpenAI,OpenAIEmbeddings
+
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_astradb import AstraDBVectorStore
-from langchain.agents import create_tool_calling_agent
-from langchain.agents import AgentExecutor
-from langchain.tools.retriever import create_retriever_tool
-from langchain import hub
+from langchain.agents import create_agent
+from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
+from langchain_core.tools.retriever import create_retriever_tool
+from langchain_classic import hub 
+from github import fetch_issues
 from note import note_tool
 
 load_dotenv()
@@ -25,9 +26,9 @@ def connect_to_vstore():
     vstore = AstraDBVectorStore(
         embedding = embeddings,
         collection_name = 'github',
-        apoi_endpoint = ASTRA_DB_API_ENDPOINT,
+        api_endpoint = ASTRA_DB_API_ENDPOINT,
         token = ASTRA_DB_APPLICATION_TOKEN,
-        keyspace = ASTRA_DB_KEYSPACE
+        namespace = ASTRA_DB_KEYSPACE
     )
     return vstore
 
@@ -52,8 +53,8 @@ if add_to_vstore:
 
 retriver = vstore.as_retriever(search_kwargs={"k":3})
 retriver_tool = create_retriever_tool(
-    retriver=retriver,
-    name="GitHub Issues Retriever",
+    retriever=retriver,
+    name="github_issues_retriever",
     description="Useful for answering questions about GitHub issues . For any questions about github issues, you must use this tool!"
 )
 prompt = hub.pull("hwchase17/openai-functions-agent")
@@ -66,3 +67,8 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 while (question := input("Ask a question about github issues (q to quit): ")) != "q":
     result = agent_executor.invoke({"input": question})
     print(result["output"])
+
+
+
+
+# main.py is changed
